@@ -57,14 +57,10 @@ def post_dag(name):
 
     wml_dict = request.json
 
-
-
-
     try:
         wml_dict_parsed = MinimalWmlSchema().load(
             wml_dict, partial=False
         )
-        print("----->", wml_dict_parsed)
 
     except ValidationError as e:
         logging.exception("Error parsing WML")

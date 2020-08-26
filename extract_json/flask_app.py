@@ -7,8 +7,10 @@ from neo4j import GraphDatabase
 from py2neo import Graph
 from py2neo.cypher import cypher_escape
 from flask import jsonify
+import boto3
+from flask_restful import request
 
-from py2neo import Node, Relationship
+#from py2neo import Node, Relationship
 
 #from flask import Flask, jsonify, make_response, request, send_from_directory
 #from flask_cors import CORS
@@ -147,7 +149,7 @@ def worflowSave():
 
     workflowID = str(workflow_config["WorkflowID"])
 
-    WorkflowDefination = str(workflow_config["WorkflowDefination"])
+    WorkflowDefination = json.dumps(workflow_config["WorkflowDefination"])
 
     WorkflowName = str(workflow_config["WorkflowName"])
 
@@ -163,6 +165,8 @@ def worflowSave():
 
     result = session.run(workflow_save_query, workflowID = workflowID, WorkflowName = WorkflowName, WorkflowVersion = WorkflowVersion, WorkflowDescription = WorkflowDescription, WorkflowDefination = WorkflowDefination)
 
+    #print(stringify(result))
+
     #final_result = json.dumps(result)
 
     return str(result)
@@ -173,15 +177,19 @@ def getWorkflow():
 
     data = request.json
 
+    NodeID = request.args["NodeID"]
+    print(NodeID)
+
     driver = neo4j.get_db()
 
     session = driver.session()
 
-    get_workflow_query = 'MATCH (n:SharedDataWorkFlow) RETURN properties(n) AS SharedDataWorkFlow'
+    get_workflow_query = 'MATCH (n:SharedDataWorkFlow) WHERE n.NodeID = "' +  str(NodeID) + '" RETURN properties(n) AS SharedDataWorkFlow' # 
 
     result = session.run(get_workflow_query).data()
 
-    return str(result)
+    return jsonify(result)
+
 
 @app.route('/workflow', methods= ["PUT"])
 def updateWorkflow():
